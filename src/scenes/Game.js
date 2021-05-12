@@ -13,24 +13,29 @@ class Game extends Phaser.Scene
         /**
          * Environment
          */
-        this.load.image("clouds", "src/assets/clouds.png");
+        this.load.image('clouds', 'src/assets/clouds.png');
         this.load.image('ground', 'src/assets/platform.png');
         this.load.image('mountains', 'src/assets/mountains.png');
 
         /**
          * Spritesheets for animations
          */
-        this.load.spritesheet('frog', "src/assets/frog_sheet_16x16.png", {
+        this.load.spritesheet('frog', 'src/assets/frog_sheet_16x16.png', {
             frameWidth: 16,
             frameHeight: 16
         })
 
-        this.load.spritesheet('ninja', "src/assets/NinjaFrog/ninja_frog_double_jump_32x32.png", {
+        this.load.spritesheet('ninja', 'src/assets/NinjaFrog/ninja_frog_double_jump_32x32.png', {
             frameWidth: 32,
             frameHeight: 32
         })
 
-        this.load.spritesheet('racoon', "src/assets/Racoon/racoon_run_right_32x32.png", {
+        this.load.spritesheet('racoon', 'src/assets/Racoon/racoon_run_right_32x32.png', {
+            frameWidth: 32,
+            frameHeight: 32
+        })
+
+        this.load.spritesheet('racoon_explosion', 'src/assets/NinjaFrog/racoon_explosion.png', {
             frameWidth: 32,
             frameHeight: 32
         })
@@ -38,12 +43,11 @@ class Game extends Phaser.Scene
       
     create ()
     {
-        const ENEMY_MAX_VELOCITY =
         /**
          * Environment sprites
          */
-        this.clouds = this.add.tileSprite(640, 200, 1280, 400, "clouds");
-        this.mountains = this.add.tileSprite(640, 400, 1800, 400, "mountains").setScale(0.7).setAlpha(0.3);
+        this.clouds = this.add.tileSprite(640, 200, 1280, 400, 'clouds');
+        this.mountains = this.add.tileSprite(640, 400, 1800, 400, 'mountains').setScale(0.7).setAlpha(0.3);
         this.platform = this.physics.add.staticGroup();
         this.platform.create(400, 568, 'ground').setScale(2).refreshBody();
 
@@ -86,12 +90,21 @@ class Game extends Phaser.Scene
             repeat: -1
         })
 
+        this.anims.create({
+            key: 'racoon_explosion',
+            frames: this.anims.generateFrameNumbers('racoon_explosion'),
+            frameRate: 10,
+            repeat: 0
+        })
+
         /**
          * Initialize animations
          */
         this.frog.play('frog_anim');
         this.ninja.play('ninja_idle');
         this.racoon.play('racoon_run_right');
+
+        this.racoon.setVelocity(50);
 
         /**
          * Initialize colliders
@@ -101,11 +114,30 @@ class Game extends Phaser.Scene
         this.physics.add.collider(this.frog, this.platform);
         this.physics.add.collider(this.racoon, this.platform);
 
+        this.physics.add.overlap(this.ninja, this.racoon, () => {
+            console.log('Player has touched racoon');
+            this.racoon.play('racoon_explosion');
+            this.racoon.body.setAllowGravity(false);
+            this.racoon.setVelocity(0);
+            this.racoon.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                this.racoon.destroy();
+            });
+        });
+
         /**
          * When the racoon touches the frog, all anims will be 
          * paused and game over
          */
-        this.physics.add.overlap(this.frog, this.racoon, this.gameOver);
+        this.physics.add.overlap(this.frog, this.racoon, () => {
+            this.frog.anims.pause();
+            this.racoon.anims.pause();
+            this.racoon.setVelocity(0);
+
+            this.scene.pause();
+            this.scene.stop('Score');
+            this.scene.stop('Title');
+            this.scene.launch('GameOver');
+        });
     }
 
     update() {
@@ -122,17 +154,6 @@ class Game extends Phaser.Scene
             this.ninja.x = pointer.x;
             this.ninja.y = pointer.y;
         }, this);
-
-        /**
-         * Enemy spawning in waves
-         */
-        this.racoon.body.setVelocity(20);
-    }
-
-    gameOver() {
-        game.anims.pauseAll();
-        this.scene.stop('Score');
-        this.scene.start('GameOver');
     }
 }
 

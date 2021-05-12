@@ -8,7 +8,6 @@ class Title extends Phaser.Scene {
     }
 
     create() {
-
         /**
          * Game title text
          */
@@ -31,14 +30,8 @@ class Title extends Phaser.Scene {
     }
 
     update() {
-        this.play_button = this.play_button.setInteractive({ useHandCursor: true });
-
-        /**
-         * When clicked, title HUD will disappear
-         */
-        this.play_button.on('pointerup', () => {
-            this.scene.stop();
-            this.scene.launch('Score');
+        this.play_button.setInteractive({ 
+            useHandCursor: true 
         });
 
         /**
@@ -54,6 +47,14 @@ class Title extends Phaser.Scene {
         this.play_button.on('pointerout', () => {
             this.play_button.setColor('black');
         })
+
+        /**
+         * When clicked, title HUD will disappear
+         */
+        this.play_button.on('pointerup', () => {
+            this.scene.stop();
+            this.scene.launch('Score');
+        });
     }
 }
 
