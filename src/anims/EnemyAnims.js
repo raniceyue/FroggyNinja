@@ -1,5 +1,3 @@
 import Phaser from 'phaser';
 
-const createRacoonAnims = (anims) = {
-    
-}
+const createRacoonAnims = (anims = {});

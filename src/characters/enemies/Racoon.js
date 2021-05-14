@@ -1,22 +1,13 @@
 import Phaser from 'phaser';
 
-class Racoon extends Phaser.GameObjects.Sprite {
+class Racoon extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y, direction, hp) {
+        super(scene, x, y);
 
-    constructor(scene, x, y, direction) {
-        super(scene, x, y, 'racoon');
+        direction === 'left' ? this.anims.play('racoon_run_left') : this.anims.play('racoon_run_right');
 
-        // Add game object to the scene
-        scene.enemies.add(this);
-
-        (direction === 'left') 
-            ? this.play('racoon_walk_left')
-            : this.play('racoon_walk_right')
-        
-        scene.physics.world.enableBody(this);
-    }
-
-    update() {
-        
+        this.hp = hp;
+        this.isDead = false;
     }
 }
 
